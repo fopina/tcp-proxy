@@ -1,13 +1,14 @@
-FROM golang
+FROM golang:1.18-alpine
 
 WORKDIR /opt
 
 COPY main.go go.mod ./
 
-RUN env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-		go build -tags netgo -ldflags '-w' -o tcp-proxy . \
-    && strip tcp-proxy
+ENV CGO_ENABLED=0
 
-FROM alpine
-COPY --from=0 /opt/tcp-proxy /bin/tcp-proxy
+RUN go build -tags netgo -ldflags '-w -s' -o tcp-proxy .
+
+FROM scratch
+COPY --from=0 /opt/tcp-proxy /tcp-proxy
+ENTRYPOINT [ "/tcp-proxy" ]
 
