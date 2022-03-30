@@ -1,0 +1,34 @@
+before:
+  hooks:
+    - go mod tidy
+builds:
+- &config_build
+  id: confgen
+  env:
+  - CGO_ENABLED=0
+  goos:
+    - linux
+    - darwin
+    - windows
+  goarch:
+    - amd64
+    - arm
+    - arm64
+  goarm:
+    - '7'
+- <<: *config_build
+  id: confgen_sprig
+  binary: confgen_sprig
+  flags:
+    - -tags=sprig
+archives:
+  - format: binary
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
+checksum:
+  name_template: 'checksums.txt'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
